@@ -13,9 +13,9 @@ for i in range(5):
     training_set.append(cur)
 
 # append an all-on vector to the training set
-training_set.append( numpy.ones((5,1)) )
+#training_set.append( numpy.ones((5,1)) )
 
-r = badrbm.rbm(5, 6, 0.1)
+r = badrbm.rbm(5, 6, 0.1, p=0.1)
 
 count = 0
 while count < 10 ** 6:
@@ -23,6 +23,8 @@ while count < 10 ** 6:
     r.apply_update(cur)
 
     count += 1
+
+print("trained")
 
 # it seems to get stuck repeating one sample, which /kind of/ makes sense
 # so, run multiple trials, make sure it will at least get stuck in any training sample that shows up
@@ -38,15 +40,25 @@ def demented_energy_guess(rbm, v, samples=20):
 
     return energy
 
+def get_random_sample(prob=0.5):
+    r = numpy.random.rand(5,1)
+    for i in range(len(r)):
+        if r[i] < prob:
+            r[i] = 1.0
+        else:
+            r[i] = 0.0
+
+    return r
+
 with open("samples.dat", "w") as ofile:
-    earlies = []
+    #earlies = []
 
     trial = 0
     while trial < 100:
         ofile.write("trial {}\n".format(trial))
 
-        samples = r.get_samples(40)
-        earlies.append(samples[1])
+        samples = r.get_samples(20)
+        #earlies.append(samples[1])
 
         for sample in samples:
             ofile.write(str(sample.T) + "\n")
@@ -61,9 +73,15 @@ with open("samples.dat", "w") as ofile:
         e = demented_energy_guess(r, s)
         ofile.write("{}  {}\n".format(s.T, e))
 
-    for s in earlies:
+#    for s in earlies:
+#        e = demented_energy_guess(r, s)
+#        ofile.write("{}  {}\n".format(s.T, e))
+
+    for _ in range(20):
+        s = get_random_sample()
         e = demented_energy_guess(r, s)
         ofile.write("{}  {}\n".format(s.T, e))
+
 
     ofile.write("\n\nW:\n{}\n\na:\n{}\n\nb:\n{}\n".format(r.W, r.a, r.b))
     

@@ -9,7 +9,19 @@ class RbmError(Exception):
     pass
 
 class rbm:
-    def __init__(self, i, j, rate): # i = |v|, j = |h|
+    def __init__(self, i, j, rate, p=None): # i = |v|, j = |h|, p -> momentum
+        if i < 1:
+            raise RbmError("There must be at least one visible unit")
+
+        if j < 1:
+            raise RbmError("There must be at least one hidden unit")
+
+        if p is not None:
+            if p > 0.5:
+                raise RbmError("Momentum greater than 0.5 doesn't make sense.")
+            elif p <= 0.0:
+                raise RbmError("Zero-or-less momentum doesn't make sense (use momentum=None to turn momentum off).")
+
         self.i = i # record |v| for error-checking
         self.j = j # record |h| for error-checking
 
@@ -19,6 +31,9 @@ class rbm:
         self.W = numpy.random.rand(i,j)
 
         self.rate = rate
+
+        self.p = p
+        self.last_dW = None
 
     def get_energy(self, v, h):
         if v.shape != (self.i, 1):
@@ -93,18 +108,16 @@ class rbm:
         if rate is None:
             rate = self.rate
 
-#        update = self.get_weight_update(v)
-#
-#        self.W += update * rate
-#
-#        a_update, b_update = self.get_bias_updates(v)
-#
-#        self.a += a_update * rate
-#        self.b += b_update * rate
-
         w_update, a_update, b_update = self.get_updates(v)
 
-        self.W += w_update * rate
+        if self.p is not None:
+            self.W += self.p * w_update
+            if self.last_dW is not None:
+                self.W += (1.0 - self.p) * self.last_dW
+            self.last_dW = w_update
+        else:
+            self.W += w_update * rate
+
         self.a += a_update * rate
         self.b += b_update * rate
 
