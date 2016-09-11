@@ -1,5 +1,7 @@
 #! /usr/bin/python3
 
+import random
+
 # fasta_chars = "ANDRCGQEHILKMFPSTYWV"
 
 codec = {
@@ -25,19 +27,82 @@ codec = {
     "V": (1, 0, 0, 1, 1)
 }
 
-class FastaFile:
+def get_fchar_for_code(code):
+    for fc in codec:
+        if codec[fc] == code:
+            return fc
+
+        return None
+
+def get_fstr_for_codes(codeseq):
+    if len(codeseq) % 5 != 0:
+        raise Exception("codeseq must be a multiple of code width (which is 5)")
+
+    res = list()
+    for i in range(len(codeseq) // 5):
+        cur_code = tuple( codeseq[i * 5 : (i+1) * 5] )
+
+        cur_fchar = get_fchar_for_code(cur_code)
+        if cur_fchar is not None:
+            res.append(cur_fchar)
+        else:
+            res.append("-")
+
+    return "".join(res)
+
+#class _FastaCodeIterator:
+#    def __init__(self, fasta_string, window):
+#        if len(fasta_string) < window:
+#            raise Exception("fasta_string must be long enough to form at least 1 window")
+#
+#        self.fasta_string = fasta_string
+#        self.window = window
+#
+#        self.i = 0
+#
+#    def __next__(self):
+#        if self.i > len(self.fasta_string) - self.window:
+#            raise StopIteration
+#
+#        code = list()
+#        for w in range(self.window):
+#            c = self.fasta_string[self.i + w]
+#            if c not in codec:
+#                raise Exception("fasta string contained character not in codec")
+#
+#            for num in codec[c]:
+#                code.append(num)
+#
+#        self.i += 1
+#
+#        return code
+
+def get_code_iterator(fasta_string, window):
+    for i in range( (len(fasta_string) - window) + 1):
+        res = list()
+        for w in range(window):
+            c = fasta_string[i + w]
+            if c not in codec:
+                raise Exception("non-FASTA character in fasta string")
+
+            for e in codec[c]:
+                res.append(e)
+
+        yield res
+
+class FastaParser:
     def __init__(self):
         self.records = []
 
     def add_from_stream(self, fstream):
         last_record = ""
-        for line in file:
+        for line in fstream:
             line.strip()
 
             if len(line) < 1:
                 continue
 
-            if line[0] == '>' or line[0] == ';'
+            if line[0] == '>' or line[0] == ';':
                 # store record if there is one
                 if len(last_record) > 0:
                     self.records.append( last_record )
@@ -57,5 +122,15 @@ class FastaFile:
 
     def clear(self):
         self.records.clear()
-        
+
+#    def get_fasta_iterator(self, window):
+#       fstring = random.choice(self.records)
+#
+#       return _FastaCodeIterator(fstring, window)
+    
+    def get_random_record(self):
+        return random.choice(self.records)
+
+    def get_iter_for_random_record(self, window):
+        return get_code_iterator(random.choice(self.records), window)
 
