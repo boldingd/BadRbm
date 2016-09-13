@@ -111,9 +111,9 @@ class rbm:
         w_update, a_update, b_update = self.get_updates(v)
 
         if self.p is not None:
-            self.W += self.p * w_update
+            self.W += (1.0 - self.p) * w_update * rate
             if self.last_dW is not None:
-                self.W += (1.0 - self.p) * self.last_dW
+                self.W += self.p * self.last_dW * rate
             self.last_dW = w_update
         else:
             self.W += w_update * rate
