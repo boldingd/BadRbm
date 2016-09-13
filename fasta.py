@@ -32,7 +32,7 @@ def get_fchar_for_code(code):
         if codec[fc] == code:
             return fc
 
-        return None
+    return None
 
 def get_fstr_for_codes(codeseq):
     if len(codeseq) % 5 != 0:

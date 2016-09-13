@@ -13,7 +13,7 @@ for i in range(5):
     training_set.append(cur)
 
 # append an all-on vector to the training set
-#training_set.append( numpy.ones((5,1)) )
+training_set.append( numpy.ones((5,1)) )
 
 r = badrbm.rbm(5, 6, 0.1, p=0.1)
 
@@ -54,10 +54,10 @@ with open("samples.dat", "w") as ofile:
     #earlies = []
 
     trial = 0
-    while trial < 100:
+    while trial < 40:
         ofile.write("trial {}\n".format(trial))
 
-        samples = r.get_samples(20)
+        samples = r.get_samples(10)
         #earlies.append(samples[1])
 
         for sample in samples:
