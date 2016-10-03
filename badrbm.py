@@ -35,6 +35,12 @@ class rbm:
         self.p = p
         self.last_dW = None
 
+    def get_json(self):
+        pass
+
+    def set(self, json_string):
+        pass
+
     def get_energy(self, v, h):
         if v.shape != (self.i, 1):
             raise RbmError("wrong shape for v, should be (i, 1).")
@@ -62,8 +68,8 @@ class rbm:
         return v_res
 
     def get_h(self, v):
-        #h_probs = scipy.special.expit(self.b + (self.W.T @ v))
-        h_probs = scipy.special.expit(self.b + (v @ self.W))
+        h_probs = scipy.special.expit(self.b + (self.W.T @ v))
+        #h_probs = scipy.special.expit(self.b + (v.T @ self.W).T) # trying to avoid an expensive matrix invert
         h_vals = numpy.random.rand(self.j, 1)
 
         h_res = numpy.zeros((self.j, 1))
@@ -146,4 +152,6 @@ class rbm:
 
 # I determined that W.T @ v = v @ W in the lasiest and dumbest way possible
 # I asked my brother, who is a methematician
+# with one proviso: at least in numpy, v.T @ w produces a row-vector, and w.T @ v produces a column vector.
+# simple test shows that it's actually faster with the matrix transpose?  It is a small matrix in the test, hmm.
 
