@@ -62,7 +62,8 @@ class rbm:
         return v_res
 
     def get_h(self, v):
-        h_probs = scipy.special.expit(self.b + (self.W.T @ v))
+        #h_probs = scipy.special.expit(self.b + (self.W.T @ v))
+        h_probs = scipy.special.expit(self.b + (v @ self.W))
         h_vals = numpy.random.rand(self.j, 1)
 
         h_res = numpy.zeros((self.j, 1))
@@ -72,26 +73,26 @@ class rbm:
 
         return h_res
 
-    def get_weight_update(self, v):
-        # https://en.wikipedia.org/wiki/Restricted_Boltzmann_machine
-        h = self.get_h(v)
-        positive = v @ h.T
-
-        vprime = self.get_v(h)
-        hprime = self.get_h(vprime)
-        negative = vprime @ hprime.T
-
-        return positive - negative
-
-    def get_bias_updates(self, v):
-        # random "seems reasonable" guess (not spelled out in paper or wikipedia)
-        # /should/ be folded into get_weight_update
-        
-        h = self.get_h(v)
-        vprime = self.get_v(h)
-        hprime = self.get_h(vprime)
-
-        return v - vprime, h - hprime
+#    def get_weight_update(self, v):
+#        # https://en.wikipedia.org/wiki/Restricted_Boltzmann_machine
+#        h = self.get_h(v)
+#        positive = v @ h.T
+#
+#        vprime = self.get_v(h)
+#        hprime = self.get_h(vprime)
+#        negative = vprime @ hprime.T
+#
+#        return positive - negative
+#
+#    def get_bias_updates(self, v):
+#        # random "seems reasonable" guess (not spelled out in paper or wikipedia)
+#        # /should/ be folded into get_weight_update
+#        
+#        h = self.get_h(v)
+#        vprime = self.get_v(h)
+#        hprime = self.get_h(vprime)
+#
+#        return v - vprime, h - hprime
 
     def get_updates(self, v):
         h = self.get_h(v)
