@@ -35,12 +35,6 @@ class rbm:
         self.p = p
         self.last_dW = None
 
-    def get_json(self):
-        pass
-
-    def set(self, json_string):
-        pass
-
     def get_energy(self, v, h):
         if v.shape != (self.i, 1):
             raise RbmError("wrong shape for v, should be (i, 1).")
@@ -79,35 +73,14 @@ class rbm:
 
         return h_res
 
-#    def get_weight_update(self, v):
-#        # https://en.wikipedia.org/wiki/Restricted_Boltzmann_machine
-#        h = self.get_h(v)
-#        positive = v @ h.T
-#
-#        vprime = self.get_v(h)
-#        hprime = self.get_h(vprime)
-#        negative = vprime @ hprime.T
-#
-#        return positive - negative
-#
-#    def get_bias_updates(self, v):
-#        # random "seems reasonable" guess (not spelled out in paper or wikipedia)
-#        # /should/ be folded into get_weight_update
-#        
-#        h = self.get_h(v)
-#        vprime = self.get_v(h)
-#        hprime = self.get_h(vprime)
-#
-#        return v - vprime, h - hprime
-
     def get_updates(self, v):
         h = self.get_h(v)
         vprime = self.get_v(h)
         hprime = self.get_h(vprime)
 
         w_update = (v @ h.T) - (vprime @ hprime.T)
-        a_update = v - vprime
-        b_update = h - hprime
+        a_update = (v - vprime)
+        b_update = (h - hprime)
 
         return w_update, a_update, b_update
 
@@ -125,8 +98,8 @@ class rbm:
         else:
             self.W += w_update * rate
 
-        self.a += a_update * rate
-        self.b += b_update * rate
+        self.a += a_update * (rate / len(v))
+        self.b += b_update * (rate / len(v))
 
     def get_samples(self, count, initial_visible=None):
         samples = []
@@ -138,8 +111,6 @@ class rbm:
 
         generated = 0;
         while generated < count:
-            #print(str(current_v))
-
             current_h = self.get_h(current_v)
             current_v = self.get_v(current_h)
 
